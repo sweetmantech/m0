@@ -8,7 +8,7 @@ import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
 import { generateUUID } from '@/lib/utils';
 import { getWeather } from '@/lib/ai/tools/get-weather';
 import { isProductionEnvironment } from '@/lib/constants';
-import { myProvider } from '@/lib/ai/providers';
+import { vercel } from '@ai-sdk/vercel';
 import { postRequestBodySchema, type PostRequestBody } from './schema';
 import { geolocation } from '@vercel/functions';
 import {
@@ -68,12 +68,13 @@ export async function POST(request: Request) {
     };
 
     const streamId = generateUUID();
+  
 
     const stream = createDataStream({
       execute: (dataStream) => {
         console.log('SWEETS LOGS /api/chat execute');
         const result = streamText({
-          model: myProvider.languageModel(selectedChatModel),
+          model: vercel('v0-1.0-md'),
           system: systemPrompt({ selectedChatModel, requestHints }),
           messages,
           maxSteps: 5,
