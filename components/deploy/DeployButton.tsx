@@ -1,6 +1,6 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
-import { VercelIcon } from './icons';
+import { VercelIcon } from '../icons';
 import DeployVerification from './DeployVerification';
 import { AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';

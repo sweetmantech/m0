@@ -9,7 +9,7 @@ import { PlusIcon, VercelIcon } from './icons';
 import { useSidebar } from './ui/sidebar';
 import { memo } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
-import DeployButton from './DeployButton';
+import DeployButton from './deploy';
 
 function PureChatHeader() {
   const router = useRouter();
