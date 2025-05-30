@@ -1,5 +1,6 @@
-import DeployButton from './DeployButton';
+import Deploy from './Deploy';
 import DeployVerification from './DeployVerification';
+import DeployButton from './DeployButton';
 
-export default DeployButton;
-export { DeployVerification };
+export default Deploy;
+export { DeployVerification, DeployButton };

@@ -1,8 +1,5 @@
-import { Button } from '@/components/ui/button';
 import { motion } from 'framer-motion';
-
-const DEPLOY_URL =
-  'https://vercel.com/new/clone?repository-url=https://github.com/vercel/ai-chatbot&env=AUTH_SECRET&envDescription=Learn more about how to get the API Keys for the application&envLink=https://github.com/vercel/ai-chatbot/blob/main/.env.example&demo-title=AI Chatbot&demo-description=An Open-Source AI Chatbot Template Built With Next.js and the AI SDK by Vercel.&demo-url=https://chat.vercel.ai&products=[{"type":"integration","protocol":"ai","productSlug":"grok","integrationSlug":"xai"},{"type":"integration","protocol":"storage","productSlug":"neon","integrationSlug":"neon"},{"type":"blob"}]';
+import DeployButton from './DeployButton';
 
 export default function DeployVerification({ onClose }: { onClose: () => void }) {
   return (
@@ -30,12 +27,11 @@ export default function DeployVerification({ onClose }: { onClose: () => void })
             Publish the latest version of your app. This will make your changes live and accessible to all users.
           </span>
         </div>
-        <Button
+        <DeployButton
           className="w-full bg-white text-zinc-900 hover:bg-zinc-200 h-8 px-3 py-1 text-sm"
-          onClick={() => window.open(DEPLOY_URL, '_blank', 'noopener,noreferrer')}
         >
           Deploy to Production
-        </Button>
+        </DeployButton>
       </motion.div>
     </>
   );
