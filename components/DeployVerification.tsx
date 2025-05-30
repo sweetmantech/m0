@@ -32,10 +32,7 @@ export default function DeployVerification({ onClose }: { onClose: () => void })
         </div>
         <Button
           className="w-full bg-white text-zinc-900 hover:bg-zinc-200 h-8 px-3 py-1 text-sm"
-          onClick={() => {
-            window.open(DEPLOY_URL, '_blank', 'noopener,noreferrer');
-            onClose();
-          }}
+          onClick={() => window.open(DEPLOY_URL, '_blank', 'noopener,noreferrer')}
         >
           Deploy to Production
         </Button>
