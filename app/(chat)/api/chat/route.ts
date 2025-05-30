@@ -7,6 +7,7 @@ import {
 import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
 import { generateUUID } from '@/lib/utils';
 import { getWeather } from '@/lib/ai/tools/get-weather';
+import { createDocument } from '@/lib/ai/tools/create-document';
 import { isProductionEnvironment } from '@/lib/constants';
 import { vercel } from '@ai-sdk/vercel';
 import { postRequestBodySchema, type PostRequestBody } from './schema';
@@ -82,6 +83,7 @@ export async function POST(request: Request) {
           experimental_generateMessageId: generateUUID,
           tools: {
             getWeather,
+            createDocument: createDocument({ dataStream }),
           },
           experimental_telemetry: {
             isEnabled: isProductionEnvironment,
