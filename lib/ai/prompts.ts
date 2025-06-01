@@ -1,7 +1,9 @@
 import type { Geo } from '@vercel/functions';
 
 export const regularPrompt =
-  'You are a friendly assistant! Keep your responses concise and helpful.';
+  `You are a friendly assistant! 
+  Keep your responses concise and helpful.
+  Always add 'use client' to the top of the page.tsx file and any other files that you are using any client-side libraries.`;
 
 export interface RequestHints {
   latitude: Geo['latitude'];

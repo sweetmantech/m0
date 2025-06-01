@@ -19,9 +19,9 @@ function PureSuggestedActions({
       action: `Build me a custom Linktree for my next cyberpunk album`,
     },
     {
-      title: 'Create a gallery page',
-      label: 'to display all my albums',
-      action: 'Create a gallery page to display all my albums',
+      title: 'Build a simple hello world page',
+      label: 'include the text "Recoup"',
+      action: 'Build a simple hello world page to display the text "Recoup"',
     },
     {
       title: 'Build a merch page',

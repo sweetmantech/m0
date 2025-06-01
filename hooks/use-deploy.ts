@@ -23,6 +23,20 @@ export function useDeploy(accessToken?: string | null): DeployContextValue {
     if (result || error || isLoading) setShowOverlay(true);
   }, [result, error, isLoading]);
 
+  // Helper to extract code blocks with filenames from LLM output
+  function parseFilesFromMessageContent(content: string): Array<{ file: string; data: string; encoding: string }> {
+    const fileBlocks: Array<{ file: string; data: string; encoding: string }> = [];
+    if (!content) return fileBlocks;
+    // Regex to match code blocks like ```tsx file="app/page.tsx" ...code...```
+    const codeBlockRegex = /```[a-zA-Z]+ file=\"([^\"]+)\"\n([\s\S]*?)```/g;
+    let match;
+    while ((match = codeBlockRegex.exec(content)) !== null) {
+      const [, file, data] = match;
+      fileBlocks.push({ file, data: data.trim(), encoding: 'utf-8' });
+    }
+    return fileBlocks;
+  }
+
   async function deploy(message: Message) {
     console.log('useDeploy - deploying', message);
     if (!accessToken) return;
@@ -30,10 +44,16 @@ export function useDeploy(accessToken?: string | null): DeployContextValue {
     setError(null);
     setResult(null);
     try {
+      // Parse files from message content
+      const files = parseFilesFromMessageContent(message.content);
+      const body: any = { accessToken };
+      if (files.length > 0) {
+        body.files = files;
+      }
       const res = await fetch('/api/deploy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessToken }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (res.ok) {
