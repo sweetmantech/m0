@@ -3,7 +3,6 @@
 import type { Attachment, UIMessage } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
-import { useSWRConfig } from 'swr';
 import { ChatHeader } from '@/components/chat-header';
 import { fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
 import { MultimodalInput } from './multimodal-input';
@@ -12,6 +11,7 @@ import { toast } from './toast';
 import { useSearchParams } from 'next/navigation';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
+import { useDeployContext } from '@/providers/DeployProvider';
 
 export function Chat({
   id,
@@ -26,7 +26,10 @@ export function Chat({
   isReadonly: boolean;
   autoResume: boolean;
 }) {
-  const { mutate } = useSWRConfig();
+  const searchParams = useSearchParams();
+  const query = searchParams.get('query');
+
+  const { deploy, result, error, isLoading } = useDeployContext();
 
   const {
     messages,
@@ -61,10 +64,8 @@ export function Chat({
         });
       }
     },
+    onFinish: deploy,
   });
-
-  const searchParams = useSearchParams();
-  const query = searchParams.get('query');
 
   const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
 
@@ -74,7 +75,6 @@ export function Chat({
         role: 'user',
         content: query,
       });
-
       setHasAppendedQuery(true);
     }
   }, [query, append, hasAppendedQuery, id]);
@@ -119,6 +119,24 @@ export function Chat({
             />
           )}
         </form>
+      </div>
+      <div className="mt-8">
+        {isLoading && <p>Deploying to Vercel...</p>}
+        {result && result.projectInfo && (
+          <>
+            <h2>New Project Created</h2>
+            <p>Project Name: {result.projectInfo.name}</p>
+            <p>Project ID: {result.projectInfo.id}</p>
+          </>
+        )}
+        {result && result.deploymentInfo && (
+          <>
+            <h3>Deployment Triggered</h3>
+            <p>Deployment ID: {result.deploymentInfo.id}</p>
+            <p>Status: {result.deploymentInfo.status}</p>
+          </>
+        )}
+        {error && <p className="text-red-500">Error: {error}</p>}
       </div>
     </>
   );
