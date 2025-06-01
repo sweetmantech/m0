@@ -21,7 +21,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
         code,
         client_id: process.env.VERCEL_CLIENT_ID!,
         client_secret: process.env.VERCEL_CLIENT_SECRET!,
-        redirect_uri: `${process.env.NEXT_PUBLIC_URL}/integrations/vercel/oauth2/callback`,
+        redirect_uri: `${process.env.NEXT_PUBLIC_URL}/integrations/vercel/callback`,
       }),
       cache: 'no-store',
     });
