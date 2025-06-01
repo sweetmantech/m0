@@ -1,3 +1,4 @@
+import { Vercel } from '@vercel/sdk';
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const resolvedSearchParams = await searchParams;
@@ -10,6 +11,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
 
   let accessToken: string | null = null;
   let error: string | null = null;
+  let vercelSdkReady = false;
 
   try {
     const res = await fetch('https://api.vercel.com/v2/oauth/access_token', {
@@ -32,6 +34,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
       accessToken = data.access_token;
       if (!accessToken) {
         error = 'No access_token returned from Vercel.';
+      } else {
+        // Initialize the Vercel SDK
+        const vercel = new Vercel({ bearerToken: accessToken });
+        vercelSdkReady = true;
       }
     }
   } catch (e: any) {
@@ -47,6 +53,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
     <div>
       <h2>Vercel OAuth Success</h2>
       <p>Access Token: {accessToken}</p>
+      {vercelSdkReady && <p>Vercel SDK is initialized and ready for use.</p>}
       {/* You can now use the access token or continue your app flow */}
     </div>
   );
