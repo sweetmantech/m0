@@ -4,9 +4,10 @@ import { Chat } from '@/components/chat';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 import { generateUUID } from '@/lib/utils';
 
-export default async function Page({ searchParams }: { searchParams: { [key: string]: string | string[] | undefined } }) {
+export default async function Page({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const id = generateUUID();
-  const code = searchParams?.code;
+  const resolvedSearchParams = await searchParams;
+  const code = resolvedSearchParams?.code;
 
   // If no code, show error
   if (!code || typeof code !== 'string') {
