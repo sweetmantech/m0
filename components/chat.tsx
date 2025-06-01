@@ -12,6 +12,7 @@ import { useSearchParams } from 'next/navigation';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
 import { useDeployContext } from '@/providers/DeployProvider';
+import { DeploymentInfoOverlay } from './deploy/DeploymentInfoOverlay';
 
 export function Chat({
   id,
@@ -29,7 +30,7 @@ export function Chat({
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
 
-  const { deploy, result, error, isLoading } = useDeployContext();
+  const { deploy, result, error, isLoading, showOverlay, closeOverlay } = useDeployContext();
 
   const {
     messages,
@@ -120,24 +121,14 @@ export function Chat({
           )}
         </form>
       </div>
-      <div className="mt-8">
-        {isLoading && <p>Deploying to Vercel...</p>}
-        {result && result.projectInfo && (
-          <>
-            <h2>New Project Created</h2>
-            <p>Project Name: {result.projectInfo.name}</p>
-            <p>Project ID: {result.projectInfo.id}</p>
-          </>
-        )}
-        {result && result.deploymentInfo && (
-          <>
-            <h3>Deployment Triggered</h3>
-            <p>Deployment ID: {result.deploymentInfo.id}</p>
-            <p>Status: {result.deploymentInfo.status}</p>
-          </>
-        )}
-        {error && <p className="text-red-500">Error: {error}</p>}
-      </div>
+      {showOverlay && (
+        <DeploymentInfoOverlay
+          result={result}
+          error={error}
+          isLoading={isLoading}
+          onClose={closeOverlay}
+        />
+      )}
     </>
   );
 }

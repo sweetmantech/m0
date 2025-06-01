@@ -2,19 +2,26 @@
 
 import { toast } from '@/components/toast';
 import { Message } from 'ai';
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export interface DeployContextValue {
   deploy: (message: Message) => Promise<any>;
   result: any;
   error: string | null;
   isLoading: boolean;
+  showOverlay: boolean;
+  closeOverlay: () => void;
 }
 
-export function useDeploy(accessToken?: string | null) {
+export function useDeploy(accessToken?: string | null): DeployContextValue {
   const [result, setResult] = useState<any>(null);
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
+  const [showOverlay, setShowOverlay] = useState(false);
+
+  useEffect(() => {
+    if (result || error || isLoading) setShowOverlay(true);
+  }, [result, error, isLoading]);
 
   async function deploy(message: Message) {
     console.log('useDeploy - deploying', message);
@@ -45,5 +52,10 @@ export function useDeploy(accessToken?: string | null) {
       setIsLoading(false);
     }
   }
-  return { deploy, result, error, isLoading };
+
+  function closeOverlay() {
+    setShowOverlay(false);
+  }
+
+  return { deploy, result, error, isLoading, showOverlay, closeOverlay };
 } 
