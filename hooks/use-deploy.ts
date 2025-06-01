@@ -16,7 +16,7 @@ export function useDeploy(accessToken?: string | null) {
   const [error, setError] = useState<string | null>(null);
   const [isLoading, setIsLoading] = useState(false);
 
-  async function deploy(message: string) {
+  async function deploy(message: Message) {
     console.log('useDeploy - deploying', message);
     if (!accessToken) return;
     setIsLoading(true);
