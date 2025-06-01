@@ -1,10 +1,11 @@
 'use client';
 
 import { toast } from '@/components/toast';
+import { Message } from 'ai';
 import { useState } from 'react';
 
 export interface DeployContextValue {
-  deploy: (message: string) => Promise<any>;
+  deploy: (message: Message) => Promise<any>;
   result: any;
   error: string | null;
   isLoading: boolean;
