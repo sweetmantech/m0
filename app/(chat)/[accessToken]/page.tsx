@@ -1,12 +1,13 @@
 import { Vercel } from '@vercel/sdk';
 
-export default async function AccessTokenPage({ params }: { params: { accessToken: string } }) {
+export default async function AccessTokenPage({ params }: { params: Promise<{ accessToken: string }> }) {
+  const { accessToken } = await params;
   let projectInfo: { id: string; name: string } | null = null;
   let error: string | null = null;
 
   try {
     // Initialize the Vercel SDK
-    const vercel = new Vercel({ bearerToken: params.accessToken });
+    const vercel = new Vercel({ bearerToken: accessToken });
     // Create a new project
     const createResponse = await vercel.projects.createProject({
       requestBody: {
