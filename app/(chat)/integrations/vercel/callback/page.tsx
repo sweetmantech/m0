@@ -11,7 +11,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
 
   let accessToken: string | null = null;
   let error: string | null = null;
-  let vercelSdkReady = false;
+  let projectInfo: { id: string; name: string } | null = null;
 
   try {
     const res = await fetch('https://api.vercel.com/v2/oauth/access_token', {
@@ -37,24 +37,35 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
       } else {
         // Initialize the Vercel SDK
         const vercel = new Vercel({ bearerToken: accessToken });
-        vercelSdkReady = true;
+        // Create a new project
+        const createResponse = await vercel.projects.createProject({
+          requestBody: {
+            name: 'new-wav0-project',
+            framework: 'nextjs',
+          },
+        });
+        projectInfo = { id: createResponse.id, name: createResponse.name };
       }
     }
   } catch (e: any) {
-    error = e?.message || 'Unknown error during token exchange.';
+    error = e?.message || 'Unknown error during token exchange or project creation.';
   }
 
   if (error) {
     return <div>Error: {error}</div>;
   }
 
-  // You can store the accessToken in a cookie, session, or pass to a component as needed
   return (
     <div>
       <h2>Vercel OAuth Success</h2>
       <p>Access Token: {accessToken}</p>
-      {vercelSdkReady && <p>Vercel SDK is initialized and ready for use.</p>}
-      {/* You can now use the access token or continue your app flow */}
+      {projectInfo && (
+        <div>
+          <h3>New Project Created</h3>
+          <p>Project Name: {projectInfo.name}</p>
+          <p>Project ID: {projectInfo.id}</p>
+        </div>
+      )}
     </div>
   );
 }
