@@ -1,4 +1,5 @@
 import { Vercel } from '@vercel/sdk';
+import { redirect } from 'next/navigation';
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
   const resolvedSearchParams = await searchParams;
@@ -11,7 +12,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
 
   let accessToken: string | null = null;
   let error: string | null = null;
-  let projectInfo: { id: string; name: string } | null = null;
 
   try {
     const res = await fetch('https://api.vercel.com/v2/oauth/access_token', {
@@ -35,16 +35,9 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
       if (!accessToken) {
         error = 'No access_token returned from Vercel.';
       } else {
-        // Initialize the Vercel SDK
-        const vercel = new Vercel({ bearerToken: accessToken });
-        // Create a new project
-        const createResponse = await vercel.projects.createProject({
-          requestBody: {
-            name: 'new-wav0-project',
-            framework: 'nextjs',
-          },
-        });
-        projectInfo = { id: createResponse.id, name: createResponse.name };
+        // Optionally: Initialize the Vercel SDK or create a project here
+        // Redirect to the new access token page
+        redirect(`/${accessToken}`);
       }
     }
   } catch (e: any) {
@@ -55,17 +48,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
     return <div>Error: {error}</div>;
   }
 
-  return (
-    <div>
-      <h2>Vercel OAuth Success</h2>
-      <p>Access Token: {accessToken}</p>
-      {projectInfo && (
-        <div>
-          <h3>New Project Created</h3>
-          <p>Project Name: {projectInfo.name}</p>
-          <p>Project ID: {projectInfo.id}</p>
-        </div>
-      )}
-    </div>
-  );
+  // This should never be reached due to redirect
+  return null;
 }
