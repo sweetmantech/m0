@@ -1,4 +1,5 @@
 import { Vercel } from '@vercel/sdk';
+import { getUniqueProjectName } from '@/lib/vercel/getUniqueProjectName';
 
 export default async function AccessTokenPage({ params }: { params: Promise<{ accessToken: string }> }) {
   const { accessToken } = await params;
@@ -8,10 +9,11 @@ export default async function AccessTokenPage({ params }: { params: Promise<{ ac
   try {
     // Initialize the Vercel SDK
     const vercel = new Vercel({ bearerToken: accessToken });
-    // Create a new project
+    // Create a new project with a unique name
+    const uniqueName = getUniqueProjectName();
     const createResponse = await vercel.projects.createProject({
       requestBody: {
-        name: 'new-wav0-project',
+        name: uniqueName,
         framework: 'nextjs',
       },
     });
