@@ -3,7 +3,6 @@
 import type { Attachment, UIMessage } from 'ai';
 import { useChat } from '@ai-sdk/react';
 import { useEffect, useState } from 'react';
-import { useSWRConfig } from 'swr';
 import { ChatHeader } from '@/components/chat-header';
 import { fetchWithErrorHandlers, generateUUID } from '@/lib/utils';
 import { MultimodalInput } from './multimodal-input';
@@ -12,6 +11,8 @@ import { toast } from './toast';
 import { useSearchParams } from 'next/navigation';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
+import { useDeployContext } from '@/providers/DeployProvider';
+import { DeploymentInfoOverlay } from './deploy/DeploymentInfoOverlay';
 
 export function Chat({
   id,
@@ -26,7 +27,10 @@ export function Chat({
   isReadonly: boolean;
   autoResume: boolean;
 }) {
-  const { mutate } = useSWRConfig();
+  const searchParams = useSearchParams();
+  const query = searchParams.get('query');
+
+  const { deploy, result, error, isLoading, showOverlay, closeOverlay } = useDeployContext();
 
   const {
     messages,
@@ -61,10 +65,8 @@ export function Chat({
         });
       }
     },
+    onFinish: deploy,
   });
-
-  const searchParams = useSearchParams();
-  const query = searchParams.get('query');
 
   const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
 
@@ -74,7 +76,6 @@ export function Chat({
         role: 'user',
         content: query,
       });
-
       setHasAppendedQuery(true);
     }
   }, [query, append, hasAppendedQuery, id]);
@@ -120,6 +121,14 @@ export function Chat({
           )}
         </form>
       </div>
+      {showOverlay && (
+        <DeploymentInfoOverlay
+          result={result}
+          error={error}
+          isLoading={isLoading}
+          onClose={closeOverlay}
+        />
+      )}
     </>
   );
 }

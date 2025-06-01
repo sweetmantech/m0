@@ -1,45 +1,27 @@
-import { Vercel } from '@vercel/sdk';
-import { getUniqueProjectName } from '@/lib/vercel/getUniqueProjectName';
-import { deployProject } from '@/lib/vercel/deployProject';
+import { cookies } from 'next/headers';
+import { Chat } from '@/components/chat';
+import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
+import { generateUUID } from '@/lib/utils';
+import { DeployProvider } from '@/providers/DeployProvider';
 
 export default async function AccessTokenPage({ params }: { params: Promise<{ accessToken: string }> }) {
   const { accessToken } = await params;
-  let projectInfo: { id: string; name: string } | null = null;
-  let deploymentInfo: { id: string; status: string } | null = null;
-  let error: string | null = null;
+  // Chat UI logic (copied from root route)
+  const id = generateUUID();
+  const cookieStore = await cookies();
+  const modelIdFromCookie = cookieStore.get('chat-model');
 
-  try {
-    // Initialize the Vercel SDK
-    const vercel = new Vercel({ bearerToken: accessToken });
-    // Create and deploy the project using the utility
-    const uniqueName = getUniqueProjectName();
-    const result = await deployProject(vercel, uniqueName);
-    projectInfo = result.projectInfo;
-    deploymentInfo = result.deploymentInfo;
-  } catch (e: any) {
-    error = e?.message || 'Unknown error during project creation or deployment.';
-  }
-
-  if (error) {
-    return <div>Error: {error}</div>;
-  }
-
+  // Wrap Chat in DeployProvider, passing accessToken
   return (
-    <div>
-      <h2>New Project Created</h2>
-      {projectInfo && (
-        <>
-          <p>Project Name: {projectInfo.name}</p>
-          <p>Project ID: {projectInfo.id}</p>
-        </>
-      )}
-      {deploymentInfo && (
-        <>
-          <h3>Deployment Triggered</h3>
-          <p>Deployment ID: {deploymentInfo.id}</p>
-          <p>Status: {deploymentInfo.status}</p>
-        </>
-      )}
-    </div>
+    <DeployProvider accessToken={accessToken}>
+      <Chat
+        key={id}
+        id={id}
+        initialMessages={[]}
+        initialChatModel={modelIdFromCookie?.value || DEFAULT_CHAT_MODEL}
+        isReadonly={false}
+        autoResume={false}
+      />
+    </DeployProvider>
   );
 } 

@@ -3,6 +3,7 @@ import { cookies } from 'next/headers';
 import { Chat } from '@/components/chat';
 import { DEFAULT_CHAT_MODEL } from '@/lib/ai/models';
 import { generateUUID } from '@/lib/utils';
+import { DeployProvider } from '@/providers/DeployProvider';
 
 export default async function Page() {
   const id = generateUUID();
@@ -12,7 +13,7 @@ export default async function Page() {
 
   if (!modelIdFromCookie) {
     return (
-      <>
+      <DeployProvider accessToken={process.env.NEXT_PUBLIC_DEFAULT_ACCESS_TOKEN!}>
         <Chat
           key={id}
           id={id}
@@ -21,20 +22,7 @@ export default async function Page() {
           isReadonly={false}
           autoResume={false}
         />
-      </>
+      </DeployProvider>
     );
   }
-
-  return (
-    <>
-      <Chat
-        key={id}
-        id={id}
-        initialMessages={[]}
-        initialChatModel={modelIdFromCookie.value}
-        isReadonly={false}
-        autoResume={false}
-      />
-    </>
-  );
 }
