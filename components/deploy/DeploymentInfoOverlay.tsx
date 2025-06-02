@@ -30,9 +30,25 @@ export function DeploymentInfoOverlay({ result, error, isLoading, onClose }: Dep
         )}
         {result && result.deploymentInfo && (
           <div className="text-center">
-            <h3 className="text-base font-medium mb-1">Deployment Triggered</h3>
+            <h3 className="text-base font-medium mb-1">Deployment Status</h3>
             <p className="text-sm text-zinc-500">Deployment ID: {result.deploymentInfo.id}</p>
-            <p className="text-xs text-zinc-400">Status: {result.deploymentInfo.status}</p>
+            <p className="text-xs text-zinc-400 mb-2">Status: {result.deploymentInfo.status}</p>
+            {result.deploymentInfo.status !== 'READY' && (
+              <div className="flex flex-col items-center gap-2">
+                <div className="w-8 h-8 border-4 border-zinc-300 border-t-zinc-900 dark:border-t-white rounded-full animate-spin mb-1" />
+                <span className="text-xs text-zinc-500">{result.deploymentInfo.status === 'ERROR' ? 'Deployment failed' : 'Deploying...'}</span>
+              </div>
+            )}
+            {result.deploymentInfo.status === 'READY' && result.deploymentInfo.url && (
+              <a
+                href={`https://${result.deploymentInfo.url}`}
+                target="_blank"
+                rel="noopener noreferrer"
+                className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+              >
+                View Deployed App
+              </a>
+            )}
           </div>
         )}
         {error && <p className="text-center text-red-500 mt-2">Error: {error}</p>}

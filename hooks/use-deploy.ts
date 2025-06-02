@@ -4,6 +4,7 @@ import { toast } from '@/components/toast';
 import { Message } from 'ai';
 import { useState, useEffect } from 'react';
 import { parseFilesFromMessageContent } from '@/lib/vercel/parseFilesFromMessageContent';
+import { useMutation, useQuery } from '@tanstack/react-query';
 
 export interface DeployContextValue {
   deploy: (message: Message) => Promise<any>;
@@ -15,53 +16,85 @@ export interface DeployContextValue {
 }
 
 export function useDeploy(accessToken?: string | null): DeployContextValue {
-  const [result, setResult] = useState<any>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [isLoading, setIsLoading] = useState(false);
   const [showOverlay, setShowOverlay] = useState(false);
+  const [deploymentId, setDeploymentId] = useState<string | null>(null);
+  const [projectInfo, setProjectInfo] = useState<any>(null);
 
-  useEffect(() => {
-    if (result || error || isLoading) setShowOverlay(true);
-  }, [result, error, isLoading]);
-
-  async function deploy(message: Message) {
-    if (!accessToken) return;
-    setIsLoading(true);
-    setError(null);
-    setResult(null);
-    try {
-      // Parse files from message content
+  // Mutation to trigger deployment
+  const deployMutation = useMutation({
+    mutationFn: async (message: Message) => {
+      if (!accessToken) throw new Error('No access token');
       const files = parseFilesFromMessageContent(message.content);
       const body: any = { accessToken };
-      if (files.length > 0) {
-        body.files = files;
-      }
+      if (files.length > 0) body.files = files;
       const res = await fetch('/api/deploy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(body),
       });
       const data = await res.json();
-      if (res.ok) {
-        toast({ type: 'success', description: `Deployed: ${data.deploymentInfo?.id || 'Success'}` });
-        setResult(data);
-      } else {
-        toast({ type: 'error', description: data.error || 'Deployment failed' });
-        setError(data.error || 'Deployment failed');
-      }
+      if (!res.ok) throw new Error(data.error || 'Deployment failed');
+      setProjectInfo(data.projectInfo);
+      setDeploymentId(data.deploymentInfo?.id);
       return data;
-    } catch (e: any) {
-      toast({ type: 'error', description: e?.message || 'Deployment error' });
-      setError(e?.message || 'Deployment error');
-      return { error: e?.message || 'Deployment error' };
-    } finally {
-      setIsLoading(false);
-    }
+    },
+    onSuccess: () => setShowOverlay(true),
+    onError: () => setShowOverlay(true),
+  });
+
+  // Query to poll deployment status
+  const {
+    data: deploymentStatus,
+    isLoading: isPolling,
+    error: pollingError,
+  } = useQuery<any>({
+    queryKey: ['vercel-deployment', deploymentId, accessToken],
+    queryFn: async () => {
+      if (!deploymentId || !accessToken) return null;
+      const res = await fetch(`/api/deploy/status?id=${deploymentId}&accessToken=${accessToken}`);
+      if (!res.ok) throw new Error('Failed to fetch deployment status');
+      return res.json();
+    },
+    enabled: !!deploymentId && !!accessToken,
+    refetchInterval: (data: any) => {
+      // Stop polling if deployment is ready or errored
+      if (!data) return 2000;
+      if (data?.readyState === 'READY' || data?.readyState === 'ERROR' || data?.readyState === 'CANCELED') return false;
+      return 2000;
+    },
+  });
+
+  function deploy(message: Message) {
+    setShowOverlay(false);
+    setDeploymentId(null);
+    setProjectInfo(null);
+    return deployMutation.mutateAsync(message);
   }
 
   function closeOverlay() {
     setShowOverlay(false);
   }
 
-  return { deploy, result, error, isLoading, showOverlay, closeOverlay };
+  // Compose result for overlay
+  const result = deploymentId
+    ? {
+        projectInfo,
+        deploymentInfo: deploymentStatus
+          ? {
+              id: deploymentId,
+              status: deploymentStatus.readyState,
+              url: deploymentStatus.url,
+            }
+          : { id: deploymentId, status: 'QUEUED' },
+      }
+    : deployMutation.data;
+
+  return {
+    deploy,
+    result,
+    error: (deployMutation.error as any)?.message || (pollingError as any)?.message || null,
+    isLoading: deployMutation.isPending || isPolling,
+    showOverlay,
+    closeOverlay,
+  };
 } 
