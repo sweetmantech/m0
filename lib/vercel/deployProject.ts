@@ -39,7 +39,6 @@ export async function deployProject(
 
   // Always use getDeploymentFiles to backfill required files
   const deploymentFiles = getDeploymentFiles(uniqueName, files, requiredPackages);
-  console.log('SWEETS LOGS /lib/vercel/deployProject deploymentFiles', deploymentFiles);
   
   // Deploy the new project
   const deployResponse = await vercel.deployments.createDeployment({

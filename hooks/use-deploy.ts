@@ -38,7 +38,6 @@ export function useDeploy(accessToken?: string | null): DeployContextValue {
   }
 
   async function deploy(message: Message) {
-    console.log('useDeploy - deploying', message);
     if (!accessToken) return;
     setIsLoading(true);
     setError(null);

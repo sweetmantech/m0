@@ -6,7 +6,6 @@ import { deployProject } from '@/lib/vercel/deployProject';
 export async function POST(req: NextRequest) {
   try {
     const { accessToken, files } = await req.json();
-    console.log('SWEETS LOGS /api/deploy files', files);
     if (!accessToken) {
       return NextResponse.json({ error: 'Missing accessToken' }, { status: 400 });
     }

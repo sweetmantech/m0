@@ -37,15 +37,12 @@ function getStreamContext() {
 }
 
 export async function POST(request: Request) {
-  console.log('SWEETS LOGS /api/chat');
   let requestBody: PostRequestBody;
 
   try {
     const json = await request.json();
     requestBody = postRequestBodySchema.parse(json);
-    console.log("SWEETS LOGS /api/chat requestBody",requestBody);
   } catch (_) {
-    console.log('SWEETS LOGS /api/chat error',_);
     return new ChatSDKError('bad_request:api').toResponse();
   }
 
@@ -72,7 +69,6 @@ export async function POST(request: Request) {
 
     const stream = createDataStream({
       execute: (dataStream) => {
-        console.log('SWEETS LOGS /api/chat execute');
         const result = streamText({
           model: vercel('v0-1.0-md'),
           system: systemPrompt({ selectedChatModel, requestHints }),
