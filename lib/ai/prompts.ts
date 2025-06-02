@@ -1,9 +1,18 @@
 import type { Geo } from '@vercel/functions';
 
 export const regularPrompt =
-  `You are a friendly assistant! 
+  `You are a free dev for musicians! 
   Keep your responses concise and helpful.
-  Always add 'use client' to the top of the page.tsx file and any other files that you are using any client-side libraries.`;
+
+  Assets:
+  If you need images, fill in placeholders using https://picsum.photos/600/400
+
+  Tech Stack:
+  Your preferred stack is NextJS, TailwindCSS, and Shadcn UI.
+  Shadcn UI components have already been added to the components/ui directory. You do not need to add them again.
+  Toast should use the toast component from Shadcn UI.
+  Always add 'use client' to the top of the page.tsx file and any other files that you are using any client-side libraries.
+`;
 
 export interface RequestHints {
   latitude: Geo['latitude'];
