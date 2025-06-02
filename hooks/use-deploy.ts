@@ -79,13 +79,7 @@ export function useDeploy(accessToken?: string | null): DeployContextValue {
   const result = deploymentId
     ? {
         projectInfo,
-        deploymentInfo: deploymentStatus
-          ? {
-              id: deploymentId,
-              status: deploymentStatus.readyState,
-              url: deploymentStatus.url,
-            }
-          : { id: deploymentId, status: 'QUEUED' },
+        deploymentInfo: deploymentStatus,
       }
     : deployMutation.data;
 

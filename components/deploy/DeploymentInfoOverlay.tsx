@@ -39,15 +39,26 @@ export function DeploymentInfoOverlay({ result, error, isLoading, onClose }: Dep
                 <span className="text-xs text-zinc-500">{result.deploymentInfo.status === 'ERROR' ? 'Deployment failed' : 'Deploying...'}</span>
               </div>
             )}
-            {result.deploymentInfo.status === 'READY' && result.deploymentInfo.url && (
-              <a
-                href={`https://${result.deploymentInfo.url}`}
-                target="_blank"
-                rel="noopener noreferrer"
-                className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
-              >
-                View Deployed App
-              </a>
+            {result.deploymentInfo.status === 'READY' && (
+              result.deploymentInfo.alias?.length > 0 ? (
+                <a
+                  href={`https://${result.deploymentInfo.alias[0]}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                >
+                  View Production App
+                </a>
+              ) : result.deploymentInfo.url ? (
+                <a
+                  href={`https://${result.deploymentInfo.url}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition"
+                >
+                  View Deployed App
+                </a>
+              ) : null
             )}
           </div>
         )}
