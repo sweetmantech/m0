@@ -3,6 +3,7 @@
 import { toast } from '@/components/toast';
 import { Message } from 'ai';
 import { useState, useEffect } from 'react';
+import { parseFilesFromMessageContent } from '@/lib/vercel/parseFilesFromMessageContent';
 
 export interface DeployContextValue {
   deploy: (message: Message) => Promise<any>;
@@ -24,16 +25,21 @@ export function useDeploy(accessToken?: string | null): DeployContextValue {
   }, [result, error, isLoading]);
 
   async function deploy(message: Message) {
-    console.log('useDeploy - deploying', message);
     if (!accessToken) return;
     setIsLoading(true);
     setError(null);
     setResult(null);
     try {
+      // Parse files from message content
+      const files = parseFilesFromMessageContent(message.content);
+      const body: any = { accessToken };
+      if (files.length > 0) {
+        body.files = files;
+      }
       const res = await fetch('/api/deploy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ accessToken }),
+        body: JSON.stringify(body),
       });
       const data = await res.json();
       if (res.ok) {
