@@ -3,7 +3,6 @@ import { NextRequest, NextResponse } from 'next/server';
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const id = searchParams.get('id');
-  console.log('id', id);
   const accessToken = searchParams.get('accessToken') || process.env.VERCEL_ACCESS_TOKEN;
   if (!id || !accessToken) {
     return NextResponse.json({ error: 'Missing id or accessToken' }, { status: 400 });
@@ -19,6 +18,5 @@ export async function GET(req: NextRequest) {
     return NextResponse.json({ error }, { status: vercelRes.status });
   }
   const data = await vercelRes.json();
-  console.log('data', data);
   return NextResponse.json(data);
 } 
