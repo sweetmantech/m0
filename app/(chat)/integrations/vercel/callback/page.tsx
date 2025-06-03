@@ -1,4 +1,3 @@
-import { Vercel } from '@vercel/sdk';
 import { redirect } from 'next/navigation';
 
 export default async function Page({ searchParams }: { searchParams: Promise<{ [key: string]: string | string[] | undefined }> }) {
@@ -27,6 +26,7 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
       }),
       cache: 'no-store',
     });
+
     if (!res.ok) {
       error = `Failed to exchange code: ${res.statusText}`;
     } else {
@@ -34,10 +34,6 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
       accessToken = data.access_token;
       if (!accessToken) {
         error = 'No access_token returned from Vercel.';
-      } else {
-        // Optionally: Initialize the Vercel SDK or create a project here
-        // Redirect to the new access token page
-        redirect(`/${accessToken}`);
       }
     }
   } catch (e: any) {
@@ -47,7 +43,10 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
   if (error) {
     return <div>Error: {error}</div>;
   }
-
+  
+  if (accessToken) {
+    redirect(`/${accessToken}`);
+  }
   // This should never be reached due to redirect
   return null;
 }
