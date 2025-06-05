@@ -13,35 +13,37 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
   let accessToken: string | null = null;
   let error: string | null = null;
 
-  try {
-    const res = await fetch('https://api.vercel.com/v2/oauth/access_token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        code,
-        client_id: process.env.VERCEL_CLIENT_ID!,
-        client_secret: process.env.VERCEL_CLIENT_SECRET!,
-        redirect_uri: `${process.env.NEXT_PUBLIC_URL}/integrations/vercel/callback`,
-      }),
-      cache: 'no-store',
-    });
-    if (!res.ok) {
-      error = `Failed to exchange code: ${res.statusText}`;
-    } else {
-      const data = await res.json();
-      accessToken = data.access_token;
+  const res = await fetch('https://api.vercel.com/v2/oauth/access_token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      code,
+      client_id: process.env.VERCEL_CLIENT_ID!,
+      client_secret: process.env.VERCEL_CLIENT_SECRET!,
+      redirect_uri: `${process.env.NEXT_PUBLIC_URL}/integrations/vercel/callback`,
+    }),
+    cache: 'no-store',
+  });
+
+  if (!res.ok) {
+    error = `Failed to exchange code: ${res.statusText}`;
+  } else {
+    let data: any = null;
+    try {
+      data = await res.json();
+    } catch (e: any) {
+      error = 'Failed to parse response from Vercel.';
+    }
+    if (!error) {
+      accessToken = data?.access_token;
       if (!accessToken) {
         error = 'No access_token returned from Vercel.';
       } else {
-        // Optionally: Initialize the Vercel SDK or create a project here
-        // Redirect to the new access token page
         redirect(`/${accessToken}`);
       }
     }
-  } catch (e: any) {
-    error = e?.message || 'Unknown error during token exchange or project creation.';
   }
 
   if (error) {
