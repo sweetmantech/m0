@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import { Vercel } from '@vercel/sdk';
 
 export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
@@ -7,16 +8,32 @@ export async function GET(req: NextRequest) {
   if (!id || !accessToken) {
     return NextResponse.json({ error: 'Missing id or accessToken' }, { status: 400 });
   }
-  const vercelRes = await fetch(`https://api.vercel.com/v13/deployments/${id}`, {
-    headers: {
-      Authorization: `Bearer ${accessToken}`,
-    },
-    next: { revalidate: 0 }, // always fresh
-  });
-  if (!vercelRes.ok) {
-    const error = await vercelRes.text();
-    return NextResponse.json({ error }, { status: vercelRes.status });
+
+  const vercel = new Vercel({ bearerToken: accessToken });
+
+  // Fetch deployment info using SDK
+  let deploymentInfo;
+  try {
+    deploymentInfo = await vercel.deployments.getDeployment({ idOrUrl: id });
+  } catch (e: any) {
+    return NextResponse.json({ error: e?.message || 'Failed to fetch deployment info' }, { status: 500 });
   }
-  const data = await vercelRes.json();
-  return NextResponse.json(data);
+
+  // Fetch build logs/events using SDK
+  let logs: any[] = [];
+  try {
+    const sdkLogs = await vercel.deployments.getDeploymentEvents({ idOrUrl: id });
+    if (Array.isArray(sdkLogs)) {
+      logs = sdkLogs;
+    } else if (sdkLogs) {
+      logs = [sdkLogs];
+    }
+  } catch (e: any) {
+    logs = [];
+  }
+
+  return NextResponse.json({
+    ...deploymentInfo,
+    logs,
+  });
 } 
