@@ -1,4 +1,5 @@
 import React from 'react';
+import { DeploymentEvents } from './DeploymentEvents';
 
 interface DeploymentInfoOverlayProps {
   result: any;
@@ -35,7 +36,7 @@ export function DeploymentInfoOverlay({ result, error, isLoading, onClose }: Dep
             <p className="text-xs text-zinc-400 mb-2">Status: {result.deploymentInfo.status}</p>
             {result.deploymentInfo.status !== 'READY' && (
               <div className="flex flex-col items-center gap-2">
-                <div className="w-8 h-8 border-4 border-zinc-300 border-t-zinc-900 dark:border-t-white rounded-full animate-spin mb-1" />
+                <div className="size-8 border-4 border-zinc-300 border-t-zinc-900 dark:border-t-white rounded-full animate-spin mb-1" />
                 <span className="text-xs text-zinc-500">{result.deploymentInfo.status === 'ERROR' ? 'Deployment failed' : 'Deploying...'}</span>
               </div>
             )}
@@ -60,6 +61,7 @@ export function DeploymentInfoOverlay({ result, error, isLoading, onClose }: Dep
                 </a>
               ) : null
             )}
+            <DeploymentEvents logs={result.deploymentInfo.logs} />
           </div>
         )}
         {error && <p className="text-center text-red-500 mt-2">Error: {error}</p>}
