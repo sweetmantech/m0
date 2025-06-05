@@ -1,5 +1,6 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { DeploymentEvents } from './DeploymentEvents';
+import { StaticPreview } from './StaticPreview';
 
 interface DeploymentInfoOverlayProps {
   result: any;
@@ -9,6 +10,8 @@ interface DeploymentInfoOverlayProps {
 }
 
 export function DeploymentInfoOverlay({ result, error, isLoading, onClose }: DeploymentInfoOverlayProps) {
+  const [showPreview, setShowPreview] = useState(false);
+
   if (!result && !error && !isLoading) return null;
 
   return (
@@ -27,6 +30,19 @@ export function DeploymentInfoOverlay({ result, error, isLoading, onClose }: Dep
             <h2 className="text-lg font-semibold mb-1">New Project Created</h2>
             <p className="text-sm text-zinc-500">{result.projectInfo.name}</p>
             <p className="text-xs text-zinc-400">ID: {result.projectInfo.id}</p>
+            {/* Preview Button */}
+              <button
+                className="mt-2 px-4 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 transition text-sm"
+                onClick={() => setShowPreview((v) => !v)}
+              >
+                {showPreview ? 'Hide Preview' : 'Preview'}
+              </button>
+            
+          </div>
+        )}
+        {showPreview && (
+          <div className="my-4">
+            <StaticPreview onClose={() => setShowPreview(false)} />
           </div>
         )}
         {result && result.deploymentInfo && (
