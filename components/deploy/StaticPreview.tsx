@@ -3,24 +3,39 @@ import { useDeployContext } from '@/providers/DeployProvider';
 
 function parseImports(code: string) {
   // Matches: import X from 'pkg'; import {A, B} from 'pkg'; import * as X from 'pkg';
-  const importRegex = /import\s+((\w+)|\*\s+as\s+(\w+)|\{([^}]+)\})\s+from\s+['"]([^'"]+)['"];?/g;
+  const importRegex = /import\s+((\w+)|\*\s+as\s+(\w+)|\{([^}]+)\})\s+from\s+['"]([^'"@][^'"]*)['"];?|import\s+((\w+)|\*\s+as\s+(\w+)|\{([^}]+)\})\s+from\s+['"](@\/[^'"]+)['"];?/g;
   let match;
   const imports: Array<{
     defaultImport?: string;
     namedImports?: string[];
     namespaceImport?: string;
     package: string;
+    isLocal: boolean;
+    importStatement: string;
+    importedAs?: string;
   }> = [];
   let codeWithoutImports = code;
   while ((match = importRegex.exec(code)) !== null) {
-    const [full, group, defaultImport, namespaceImport, namedImports, pkg] = match;
+    const [full, group, defaultImport, namespaceImport, namedImports, pkg, _g2, _d2, _n2, _ni2, localPkg] = match;
     codeWithoutImports = codeWithoutImports.replace(full, '');
-    if (namespaceImport) {
-      imports.push({ namespaceImport, package: pkg });
-    } else if (namedImports) {
-      imports.push({ namedImports: namedImports.split(',').map(s => s.trim().split(' as ')[0]), package: pkg });
-    } else if (defaultImport) {
-      imports.push({ defaultImport, package: pkg });
+    if (localPkg) {
+      // Local import
+      if (namespaceImport) {
+        imports.push({ namespaceImport, package: localPkg, isLocal: true, importStatement: full });
+      } else if (namedImports) {
+        imports.push({ namedImports: namedImports.split(',').map(s => s.trim().split(' as ')[0]), package: localPkg, isLocal: true, importStatement: full });
+      } else if (defaultImport) {
+        imports.push({ defaultImport, package: localPkg, isLocal: true, importStatement: full });
+      }
+    } else {
+      // NPM import
+      if (namespaceImport) {
+        imports.push({ namespaceImport, package: pkg, isLocal: false, importStatement: full });
+      } else if (namedImports) {
+        imports.push({ namedImports: namedImports.split(',').map(s => s.trim().split(' as ')[0]), package: pkg, isLocal: false, importStatement: full });
+      } else if (defaultImport) {
+        imports.push({ defaultImport, package: pkg, isLocal: false, importStatement: full });
+      }
     }
   }
   return { imports, codeWithoutImports };
@@ -33,10 +48,20 @@ function buildImportMap(imports: ReturnType<typeof parseImports>["imports"]) {
     'react-dom/client': 'https://esm.sh/react-dom@18.2.0/client',
   };
   imports.forEach(imp => {
+    if (imp.isLocal) return;
     if (imp.package === 'react' || imp.package === 'react-dom' || imp.package === 'react-dom/client') return;
     importMap[imp.package] = `https://esm.sh/${imp.package}?deps=react@18.2.0`;
   });
   return importMap;
+}
+
+function filenameToVar(filename: string) {
+  // '@/components/Header' => 'Header', 'app/page.tsx' => 'Home'
+  if (filename === 'app/page.tsx') return 'Home';
+  const parts = filename.split('/');
+  let name = parts[parts.length - 1].replace(/\.[^.]+$/, '');
+  // Capitalize
+  return name.charAt(0).toUpperCase() + name.slice(1);
 }
 
 interface StaticPreviewProps {
@@ -50,7 +75,7 @@ export function StaticPreview({ onClose }: StaticPreviewProps) {
   const [loading, setLoading] = useState(false);
   const prevBlobUrl = useRef<string | null>(null);
 
-  // Find the file named 'app/page.tsx'
+  // Find the main file
   const mainFile = files?.find((f) => f.file === 'app/page.tsx');
   const code = mainFile?.data;
 
@@ -66,13 +91,60 @@ export function StaticPreview({ onClose }: StaticPreviewProps) {
     }
     try {
       // Remove 'use client' directive
-      let codeForPreview = code.replace(/['\"]use client['\"];?/g, '');
-      // Parse imports
-      const { imports } = parseImports(codeForPreview);
-      // Build import map
-      const importMap = buildImportMap(imports);
+      let codeForPreview = code.replace(/['"]use client['"];?/g, '');
+      // Parse imports in main file
+      const { imports: mainImports } = parseImports(codeForPreview);
+      // Build import map for npm packages only
+      const importMap = buildImportMap(mainImports);
       const importMapJson = JSON.stringify({ imports: importMap }, null, 2);
+      // Prepare local files as consts
+      let localCodeBlocks: string[] = [];
+      files?.forEach(f => {
+        if (f.file === 'app/page.tsx') return;
+        let localCode = f.data.replace(/['"]use client['"];?/g, '');
+        // Remove all local imports from this file
+        const { imports: localImports, codeWithoutImports } = parseImports(localCode);
+        localCode = codeWithoutImports;
+        // Wrap as const or function
+        const varName = filenameToVar(f.file);
+        // If file starts with 'export default function' or 'export default class', convert to const
+        localCode = localCode.replace(/export default function (\w+)/, `const ${varName} = function`);
+        localCode = localCode.replace(/export default class (\w+)/, `const ${varName} = class`);
+        localCode = localCode.replace(/export default /, `const ${varName} = `);
+        localCodeBlocks.push(localCode);
+      });
+      // Prepare main file code: remove local imports, use Home as default export
+      let mainCode = codeForPreview;
+      mainImports.forEach(imp => {
+        if (imp.isLocal && imp.defaultImport) {
+          // Remove import statement, use variable directly
+          mainCode = mainCode.replace(imp.importStatement, '');
+        }
+      });
+      // Replace export default function/class in main file
+      mainCode = mainCode.replace(/export default function (\w+)/, 'function Home');
+      mainCode = mainCode.replace(/export default class (\w+)/, 'class Home');
+      mainCode = mainCode.replace(/export default /, 'const Home = ');
       // Compose HTML
+      const errorHandlerScript = `<script>
+        window.onerror = function(message, source, lineno, colno, error) {
+          document.getElementById('root').innerHTML =
+            '<div style="color:red;padding:1rem;">Error: ' + message + '<br/>' +
+            (error && error.stack ? '<pre>' + error.stack + '</pre>' : '') +
+            '</div>';
+          return false;
+        };
+        window.onunhandledrejection = function(event) {
+          document.getElementById('root').innerHTML =
+            '<div style="color:red;padding:1rem;">Unhandled Promise Rejection: ' + event.reason + '</div>';
+        };
+        const origConsoleError = console.error;
+        console.error = function(...args) {
+          origConsoleError.apply(console, args);
+          document.getElementById('root').innerHTML =
+            '<div style="color:red;padding:1rem;">Console Error: ' + args.map(a => (a && a.stack) ? a.stack : a).join(' ') + '</div>';
+        };
+      <\/script>`;
       const html = `<!DOCTYPE html>
 <html lang="en">
   <head>
@@ -85,8 +157,10 @@ export function StaticPreview({ onClose }: StaticPreviewProps) {
   </head>
   <body>
     <div id="root"></div>
+    ${errorHandlerScript}
     <script type="text/babel">
-      ${codeForPreview}
+      ${localCodeBlocks.join('\n\n')}
+      ${mainCode}
       import { createRoot } from 'react-dom/client';
       if (typeof Home === 'undefined') {
         document.getElementById('root').innerHTML = '<div style="color:red;padding:1rem;">Error: No default export (Home) found in app/page.tsx</div>';
@@ -114,7 +188,7 @@ console.log("html", html);
       cancelled = true;
       if (prevBlobUrl.current) URL.revokeObjectURL(prevBlobUrl.current);
     };
-  }, [code]);
+  }, [code, files]);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
