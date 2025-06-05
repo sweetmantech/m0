@@ -3,7 +3,9 @@ import { useDeployContext } from '@/providers/DeployProvider';
 
 function parseImports(code: string) {
   // Matches: import X from 'pkg'; import {A, B} from 'pkg'; import * as X from 'pkg';
-  const importRegex = /import\s+((\w+)|\*\s+as\s+(\w+)|\{([^}]+)\})\s+from\s+['"]([^'"@][^'"]*)['"];?|import\s+((\w+)|\*\s+as\s+(\w+)|\{([^}]+)\})\s+from\s+['"](@\/[^'"]+)['"];?/g;
+  // Also matches local, CSS, and type-only imports
+  // Updated regex to match scoped packages (e.g., @radix-ui/react-slot)
+  const importRegex = /import\s+((\w+)|\*\s+as\s+(\w+)|\{([^}]+)\})?\s*from\s*['"]([^'"]+)['"];?|import\s+['"]([^'"]+\.css)['"];?|import\s+type\s+\{[^}]+\}\s+from\s+['"]([^'"]+)['"];?/g;
   let match;
   const imports: Array<{
     defaultImport?: string;
@@ -13,46 +15,87 @@ function parseImports(code: string) {
     isLocal: boolean;
     importStatement: string;
     importedAs?: string;
+    isTypeOnly?: boolean;
+    isCss?: boolean;
   }> = [];
   let codeWithoutImports = code;
   while ((match = importRegex.exec(code)) !== null) {
-    const [full, group, defaultImport, namespaceImport, namedImports, pkg, _g2, _d2, _n2, _ni2, localPkg] = match;
-    codeWithoutImports = codeWithoutImports.replace(full, '');
-    if (localPkg) {
-      // Local import
+    const [full, group, defaultImport, namespaceImport, namedImports, pkg, cssImport, typeImport] = match;
+    // CSS import
+    if (cssImport) {
+      codeWithoutImports = codeWithoutImports.replace(full, '');
+      continue;
+    }
+    // Type-only import
+    if (typeImport) {
+      codeWithoutImports = codeWithoutImports.replace(full, '');
+      continue;
+    }
+    // Local import (starts with ./, ../, or @/)
+    if (pkg && (pkg.startsWith('./') || pkg.startsWith('../') || pkg.startsWith('@/'))) {
+      codeWithoutImports = codeWithoutImports.replace(full, '');
       if (namespaceImport) {
-        imports.push({ namespaceImport, package: localPkg, isLocal: true, importStatement: full });
+        imports.push({ namespaceImport, package: pkg, isLocal: true, importStatement: full });
       } else if (namedImports) {
-        imports.push({ namedImports: namedImports.split(',').map(s => s.trim().split(' as ')[0]), package: localPkg, isLocal: true, importStatement: full });
+        imports.push({ namedImports: namedImports.split(',').map(s => s.trim().split(' as ')[0]), package: pkg, isLocal: true, importStatement: full });
       } else if (defaultImport) {
-        imports.push({ defaultImport, package: localPkg, isLocal: true, importStatement: full });
+        imports.push({ defaultImport, package: pkg, isLocal: true, importStatement: full });
       }
-    } else {
-      // NPM import
-      if (namespaceImport) {
-        imports.push({ namespaceImport, package: pkg, isLocal: false, importStatement: full });
-      } else if (namedImports) {
-        imports.push({ namedImports: namedImports.split(',').map(s => s.trim().split(' as ')[0]), package: pkg, isLocal: false, importStatement: full });
-      } else if (defaultImport) {
-        imports.push({ defaultImport, package: pkg, isLocal: false, importStatement: full });
-      }
+      continue;
+    }
+    // NPM import (scoped or unscoped)
+    if (pkg) {
+      imports.push({
+        defaultImport,
+        namedImports: namedImports ? namedImports.split(',').map(s => s.trim().split(' as ')[0]) : undefined,
+        namespaceImport,
+        package: pkg,
+        isLocal: false,
+        importStatement: full
+      });
     }
   }
   return { imports, codeWithoutImports };
 }
 
-function buildImportMap(imports: ReturnType<typeof parseImports>["imports"]) {
+function getAllNpmImports(files: Array<{ file: string; data: string }>) {
+  // Collect all npm package imports from all files
+  const npmPkgs = new Set<string>();
+  files.forEach(f => {
+    const { imports } = parseImports(f.data);
+    imports.forEach(imp => {
+      if (!imp.isLocal && imp.package && !imp.package.startsWith('.') && !imp.package.startsWith('@/')) {
+        npmPkgs.add(imp.package);
+      }
+    });
+  });
+  return Array.from(npmPkgs);
+}
+
+function buildImportMapFromAllFiles(files: Array<{ file: string; data: string }>) {
   // Always include react, react-dom/client
   const importMap: Record<string, string> = {
     'react': 'https://esm.sh/react@18.2.0',
     'react-dom/client': 'https://esm.sh/react-dom@18.2.0/client',
   };
-  imports.forEach(imp => {
-    if (imp.isLocal) return;
-    if (imp.package === 'react' || imp.package === 'react-dom' || imp.package === 'react-dom/client') return;
-    importMap[imp.package] = `https://esm.sh/${imp.package}?deps=react@18.2.0`;
+  const pkgs = getAllNpmImports(files);
+  pkgs.forEach(pkg => {
+    if (pkg === 'react' || pkg === 'react-dom' || pkg === 'react-dom/client') return;
+    importMap[pkg] = `https://esm.sh/${pkg}?deps=react@18.2.0`;
   });
   return importMap;
+}
+
+function stripNonNpmImports(code: string, importMap: Record<string, string>) {
+  // Remove all import statements for local files, CSS, and type-only imports
+  // Only keep import statements for npm packages in the import map
+  return code.replace(/import\s+((\w+)|\*\s+as\s+(\w+)|\{([^}]+)\})?\s*from\s*['"]([^'"]+)['"];?|import\s+['"]([^'"]+\.css)['"];?|import\s+type\s+\{[^}]+\}\s+from\s+['"]([^'"]+)['"];?/g, (full, _g1, _d1, _n1, _ni1, pkg, cssImport, typeImport) => {
+    if (cssImport) return '';
+    if (typeImport) return '';
+    if (pkg && (pkg.startsWith('./') || pkg.startsWith('../') || pkg.startsWith('@/'))) return '';
+    if (pkg && importMap[pkg]) return full; // keep npm import
+    return '';
+  });
 }
 
 function filenameToVar(filename: string) {
@@ -92,35 +135,25 @@ export function StaticPreview({ onClose }: StaticPreviewProps) {
     try {
       // Remove 'use client' directive
       let codeForPreview = code.replace(/['"]use client['"];?/g, '');
-      // Parse imports in main file
-      const { imports: mainImports } = parseImports(codeForPreview);
-      // Build import map for npm packages only
-      const importMap = buildImportMap(mainImports);
+      // Build import map for all npm packages used in any file
+      const importMap = buildImportMapFromAllFiles(files || []);
       const importMapJson = JSON.stringify({ imports: importMap }, null, 2);
       // Prepare local files as consts
       let localCodeBlocks: string[] = [];
       files?.forEach(f => {
         if (f.file === 'app/page.tsx') return;
         let localCode = f.data.replace(/['"]use client['"];?/g, '');
-        // Remove all local imports from this file
-        const { imports: localImports, codeWithoutImports } = parseImports(localCode);
-        localCode = codeWithoutImports;
+        // Remove all local, CSS, and type-only imports from this file
+        localCode = stripNonNpmImports(localCode, importMap);
         // Wrap as const or function
         const varName = filenameToVar(f.file);
-        // If file starts with 'export default function' or 'export default class', convert to const
         localCode = localCode.replace(/export default function (\w+)/, `const ${varName} = function`);
         localCode = localCode.replace(/export default class (\w+)/, `const ${varName} = class`);
         localCode = localCode.replace(/export default /, `const ${varName} = `);
         localCodeBlocks.push(localCode);
       });
-      // Prepare main file code: remove local imports, use Home as default export
-      let mainCode = codeForPreview;
-      mainImports.forEach(imp => {
-        if (imp.isLocal && imp.defaultImport) {
-          // Remove import statement, use variable directly
-          mainCode = mainCode.replace(imp.importStatement, '');
-        }
-      });
+      // Prepare main file code: remove local, CSS, and type-only imports, use Home as default export
+      let mainCode = stripNonNpmImports(codeForPreview, importMap);
       // Replace export default function/class in main file
       mainCode = mainCode.replace(/export default function (\w+)/, 'function Home');
       mainCode = mainCode.replace(/export default class (\w+)/, 'class Home');
