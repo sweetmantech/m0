@@ -12,7 +12,6 @@ import { useSearchParams } from 'next/navigation';
 import { useAutoResume } from '@/hooks/use-auto-resume';
 import { ChatSDKError } from '@/lib/errors';
 import { useDeployContext } from '@/providers/DeployProvider';
-import { DeploymentInfoOverlay } from './deploy/DeploymentInfoOverlay';
 
 export function Chat({
   id,
@@ -27,10 +26,9 @@ export function Chat({
   isReadonly: boolean;
   autoResume: boolean;
 }) {
-  const {files} = useDeployContext();
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
-  const { deploy, result, error, isLoading, showOverlay, closeOverlay } = useDeployContext();
+  const { deploy } = useDeployContext();
 
   const {
     messages,
@@ -121,14 +119,6 @@ export function Chat({
           )}
         </form>
       </div>
-      {showOverlay && (
-        <DeploymentInfoOverlay
-          result={result}
-          error={error}
-          isLoading={isLoading}
-          onClose={closeOverlay}
-        />
-      )}
     </>
   );
 }
