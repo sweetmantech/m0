@@ -34,6 +34,7 @@ export function getDeploymentFiles(
     react: '19.0.0',
     'react-dom': '19.0.0',
     "tailwindcss": "^3.4.1",
+    "tailwindcss-animate": "^1.0.7",
     "postcss": "^8",
   };
 
