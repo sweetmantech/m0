@@ -1,7 +1,7 @@
 import { buildImportMapFromAllFiles } from "./buildImportMapFromAllFiles";
 import { filenameToVar } from "./filenameToVar";
 import { stripNonNpmImports } from "./stripNonNpmImports";
-import { FileDescriptor } from '../vercel/getAncillaryFeatures';
+import { VercelFile } from '@/lib/types';
 
 /**
  * Generates a blob URL for the preview iframe, given the code, files, import map, local code blocks, main code, and error handler script.
@@ -11,7 +11,7 @@ export function getIframeUrl({
     files,
 }: {
     code: string;
-    files: FileDescriptor[] | null;
+    files: VercelFile[] | null;
 }): string {
     // Remove 'use client' directive
     let codeForPreview = code.replace(/['"]use client['"];?/g, '');

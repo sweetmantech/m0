@@ -1,8 +1,5 @@
-import fs from 'fs';
-import path from 'path';
 import { getDefaultFiles } from './getDefaultFiles';
 import { extractExternalPackagesFromFiles } from './extractExternalPackagesFromFiles';
-import { getAncillaryFeatures, FileDescriptor, Feature, FeatureMatch } from './getAncillaryFeatures';
 
 export function getDeploymentFiles(
   uniqueName: string,
@@ -38,56 +35,13 @@ export function getDeploymentFiles(
     'react-dom': '19.0.0',
   };
 
-  // --- Ancillary Feature Detection ---
-  const features = getAncillaryFeatures();
-  const detectedFeatures: { feature: Feature; match: FeatureMatch }[] = [];
-  for (const feature of features) {
-    if (feature.detect) {
-      const match = feature.detect(allFiles as FileDescriptor[]);
-      if (match) {
-        detectedFeatures.push({ feature, match });
-      }
+  // Add importPackages to baseDependencies
+  for (const pkg of importPackages) {
+    if (!baseDependencies[pkg]) {
+      baseDependencies[pkg] = 'latest';
     }
   }
 
-  // --- Ancillary File Inclusion & Package Inclusion ---
-  for (const { feature, match } of detectedFeatures) {
-    let filesToAdd: { src: string; dest: string }[] = [];
-    if (typeof feature.files === 'function') {
-      filesToAdd = feature.files(match.matches ?? []);
-    } else {
-      filesToAdd = feature.files;
-    }
-    for (const { src, dest } of filesToAdd) {
-      if (!allFilesMap.has(dest)) {
-        const srcPath = path.join(process.cwd(), src);
-        let fileContent = `// ${src} not found`;
-        if (fs.existsSync(srcPath)) {
-          fileContent = fs.readFileSync(srcPath, 'utf-8');
-        }
-        allFilesMap.set(dest, {
-          file: dest,
-          data: fileContent,
-          encoding: 'utf-8',
-        });
-      }
-    }
-    let pkgsToAdd: Record<string, string> = {};
-    if (typeof feature.packages === 'function') {
-      pkgsToAdd = feature.packages(match);
-    } else {
-      pkgsToAdd = Object.fromEntries(
-        Object.entries(feature.packages).filter(([_, v]) => typeof v === 'string' && v !== undefined)
-      ) as Record<string, string>;
-    }
-    for (const [pkg, version] of Object.entries(pkgsToAdd)) {
-      if (!baseDependencies[pkg]) {
-        baseDependencies[pkg] = version;
-      }
-    }
-  }
-
-  // Remove old manual external package merge logic
   // Merge requiredPackages with baseDependencies
   const allPkgs = new Set([...(requiredPackages || [])]);
   for (const pkg of allPkgs) {

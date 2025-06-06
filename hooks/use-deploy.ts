@@ -1,11 +1,10 @@
 'use client';
 
-import { toast } from '@/components/toast';
 import { Message } from 'ai';
 import { useState, useEffect } from 'react';
 import { parseFilesFromMessageContent } from '@/lib/vercel/parseFilesFromMessageContent';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { FileDescriptor } from '../lib/vercel/getAncillaryFeatures';
+import { VercelFile } from '@/lib/types';
 
 export interface DeployContextValue {
   deploy: (message: Message) => Promise<any>;
@@ -14,14 +13,14 @@ export interface DeployContextValue {
   isLoading: boolean;
   showOverlay: boolean;
   closeOverlay: () => void;
-  files: FileDescriptor[] | null;
+  files: VercelFile[] | null;
 }
 
 export function useDeploy(accessToken?: string | null): DeployContextValue {
   const [showOverlay, setShowOverlay] = useState(false);
   const [deploymentId, setDeploymentId] = useState<string | null>(null);
   const [projectInfo, setProjectInfo] = useState<any>(null);
-  const [files, setFiles] = useState<FileDescriptor[] | null>(null);
+  const [files, setFiles] = useState<VercelFile[] | null>(null);
 
   // Mutation to trigger deployment
   const deployMutation = useMutation({
