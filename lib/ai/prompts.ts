@@ -21,7 +21,10 @@ export const regularPrompt =
   - If you use a custom Tailwind config, include the relevant config or CSS layer in your response.
   - If you use a utility class that is not part of default Tailwind, explain or define it.
   - Do not add explicit return type annotations (like : JSX.Element) to React function components—TypeScript will infer the correct type automatically in NextJS projects.
-  - Before adding props (like className) to third-party components, always check the component's type definition to ensure the prop is supported. Do not add props to components unless they are accepted by the component's type.`;
+  - Before adding props (like className) to third-party components, always check the component's type definition to ensure the prop is supported. Do not add props to components unless they are accepted by the component's type.
+  - Use Tailwind v4, always use '@import "tailwindcss";' as the top import in app/global.css (not '@tailwind base;' etc).
+  - Always use tailwind.config.ts (never tailwind.config.js) for Tailwind configuration files.
+`;
 
 export interface RequestHints {
   latitude: Geo['latitude'];
