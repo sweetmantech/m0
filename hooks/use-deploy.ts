@@ -22,6 +22,7 @@ export function useDeploy(accessToken?: string | null): DeployContextValue {
   const [deploymentId, setDeploymentId] = useState<string | null>(null);
   const [projectInfo, setProjectInfo] = useState<any>(null);
   const [files, setFiles] = useState<FileDescriptor[] | null>(null);
+  console.log("deploying files", deploymentId);
 
   // Mutation to trigger deployment
   const deployMutation = useMutation({

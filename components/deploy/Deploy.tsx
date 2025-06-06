@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { VercelIcon } from '../icons';
-import DeployVerification from './DeployVerification';
+import DeployPopover from './DeployPopover';
 import { AnimatePresence } from 'framer-motion';
 import { createPortal } from 'react-dom';
 
@@ -19,7 +19,7 @@ export default function Deploy() {
       </Button>
       {typeof window !== 'undefined' && createPortal(
         <AnimatePresence>
-          {open && <DeployVerification onClose={() => setOpen(false)} />}
+          {open && <DeployPopover onClose={() => setOpen(false)} />}
         </AnimatePresence>,
         document.body
       )}

@@ -1,7 +1,14 @@
 import { motion } from 'framer-motion';
-import DeployButton from './DeployButton';
+import { useDeployContext } from '@/providers/DeployProvider';
+import DeploySuccess from './DeploySuccess';
+import DeployProgress from './DeployProgress';
+import DeployCreate from './DeployCreate';
 
-export default function DeployVerification({ onClose }: { onClose: () => void }) {
+export default function DeployPopover({ onClose }: { onClose: () => void }) {
+  const { result, error } = useDeployContext();
+  const deploymentInfo = result?.deploymentInfo;
+  const isSuccess = deploymentInfo && deploymentInfo.status === 'READY';
+
   return (
     <>
       {/* Overlay for click-away */}
@@ -21,17 +28,13 @@ export default function DeployVerification({ onClose }: { onClose: () => void })
         role="dialog"
         aria-modal="true"
       >
-        <div className="flex flex-col gap-1">
-          <span className="font-medium text-sm">Deploy to Vercel</span>
-          <span className="text-sm text-zinc-400">
-            Publish the latest version of your app. This will make your changes live and accessible to all users.
-          </span>
-        </div>
-        <DeployButton
-          className="w-full bg-white text-zinc-900 hover:bg-zinc-200 h-8 px-3 py-1 text-sm"
-        >
-          Deploy to Production
-        </DeployButton>
+        {isSuccess ? (
+          <DeploySuccess deploymentInfo={deploymentInfo} />
+        ) : deploymentInfo ? (
+          <DeployProgress deploymentInfo={deploymentInfo} error={error} />
+        ) : (
+          <DeployCreate />
+        )}
       </motion.div>
     </>
   );

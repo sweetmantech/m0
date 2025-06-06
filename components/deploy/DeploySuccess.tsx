@@ -1,0 +1,26 @@
+import React from 'react';
+
+interface DeploySuccessProps {
+  deploymentInfo: any;
+}
+
+const DeploySuccess: React.FC<DeploySuccessProps> = ({ deploymentInfo }) => {
+  if (!deploymentInfo) return null;
+  return (
+    <div className="flex flex-col items-center gap-4 py-6">
+      <span className="text-3xl">🎉</span>
+      <span className="font-semibold text-lg">Deployment Successful!</span>
+      <span className="text-sm text-zinc-400 text-center">Your app is live and ready to use.</span>
+      <a
+        href={`https://${deploymentInfo.alias?.[0]}`}
+        target="_blank"
+        rel="noopener noreferrer"
+        className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition font-medium text-base"
+      >
+        View Production App
+      </a>
+    </div>
+  );
+};
+
+export default DeploySuccess; 

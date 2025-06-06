@@ -1,11 +1,10 @@
 'use client';
 
-import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useWindowSize } from 'usehooks-ts';
 import { SidebarToggle } from '@/components/sidebar-toggle';
 import { Button } from '@/components/ui/button';
-import { PlusIcon, VercelIcon } from './icons';
+import { PlusIcon } from './icons';
 import { useSidebar } from './ui/sidebar';
 import { memo } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
@@ -28,7 +27,7 @@ function PureChatHeader() {
           <TooltipTrigger asChild>
             <Button
               variant="outline"
-              className="order-2 md:order-1 md:px-2 px-2 md:h-fit ml-auto md:ml-0"
+              className="order-2 md:order-1 md:px-2 px-2 md:h-fit md:ml-0"
               onClick={() => {
                 router.push('/');
                 router.refresh();
@@ -42,12 +41,10 @@ function PureChatHeader() {
         </Tooltip>
       )}
 
-<div className='flex gap-2 ml-auto order-4'>
-{files && files.length > 0 && <PreviewButton />}
-
-      <DeployButton />
-</div>
-      
+      <div className='flex gap-2 md:ml-auto order-4'>
+        {files && files.length > 0 && <PreviewButton />}
+        <DeployButton />
+      </div>
     </header>
   );
 }
