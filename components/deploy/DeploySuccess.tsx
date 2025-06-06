@@ -15,7 +15,7 @@ const DeploySuccess: React.FC<DeploySuccessProps> = ({ deploymentInfo }) => {
         href={`https://${deploymentInfo.alias?.[0]}`}
         target="_blank"
         rel="noopener noreferrer"
-        className="inline-block mt-2 px-4 py-2 bg-green-600 text-white rounded hover:bg-green-700 transition font-medium text-base"
+        className="inline-block mt-2 px-4 py-2 bg-black text-white hover:bg-white hover:text-black rounded transition font-medium text-base"
       >
         View Production App
       </a>
