@@ -13,6 +13,9 @@ export const regularPrompt =
   Always include the file name in the code block markdown.
   Toast should use the toast component from Shadcn UI.
   Always add 'use client' to the top of the page.tsx file and any other files that you are using any client-side libraries.
+
+  TypeScript Notes:
+  - Always add explicit types for all function parameters and variables in TypeScript files to avoid 'implicit any' errors.
 `;
 
 export interface RequestHints {
