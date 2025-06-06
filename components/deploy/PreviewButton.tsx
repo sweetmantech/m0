@@ -1,5 +1,6 @@
 import React, { useState } from 'react';
 import { StaticPreview } from './StaticPreview';
+import { createPortal } from 'react-dom';
 
 interface PreviewButtonProps {
   className?: string;
@@ -16,11 +17,14 @@ const PreviewButton: React.FC<PreviewButtonProps> = ({ className = '', label }) 
       >
         {showPreview ? 'Hide Preview' : (label || 'Preview')}
       </button>
-      {showPreview && (
-        <div className="my-4">
-          <StaticPreview onClose={() => setShowPreview(false)} />
-        </div>
-      )}
+      {typeof window !== 'undefined' && showPreview &&
+        createPortal(
+          <div>
+            <StaticPreview onClose={() => setShowPreview(false)} />
+          </div>,
+          document.body
+        )
+      }
     </>
   );
 };

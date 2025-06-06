@@ -10,6 +10,7 @@ import { useSidebar } from './ui/sidebar';
 import { memo } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import DeployButton from './deploy';
+import PreviewButton from './deploy/PreviewButton';
 
 function PureChatHeader() {
   const router = useRouter();
@@ -40,7 +41,12 @@ function PureChatHeader() {
         </Tooltip>
       )}
 
+<div className='flex gap-2 ml-auto order-4'>
+<PreviewButton />
+
       <DeployButton />
+</div>
+      
     </header>
   );
 }
