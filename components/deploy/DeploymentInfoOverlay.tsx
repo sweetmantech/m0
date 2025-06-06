@@ -1,5 +1,4 @@
 import { DeploymentEvents } from './DeploymentEvents';
-import PreviewButton from './PreviewButton';
 
 interface DeploymentInfoOverlayProps {
   result: any;
@@ -27,7 +26,6 @@ export function DeploymentInfoOverlay({ result, error, isLoading, onClose }: Dep
             <h2 className="text-lg font-semibold mb-1">New Project Created</h2>
             <p className="text-sm text-zinc-500">{result.projectInfo.name}</p>
             <p className="text-xs text-zinc-400">ID: {result.projectInfo.id}</p>
-            <PreviewButton />
           </div>
         )}
         {result && result.deploymentInfo && (

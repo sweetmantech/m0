@@ -10,11 +10,13 @@ import { useSidebar } from './ui/sidebar';
 import { memo } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import DeployButton from './deploy';
+import PreviewButton from './deploy/PreviewButton';
+import { useDeployContext } from '@/providers/DeployProvider';
 
 function PureChatHeader() {
   const router = useRouter();
   const { open } = useSidebar();
-
+  const {files} = useDeployContext();
   const { width: windowWidth } = useWindowSize();
 
   return (
@@ -40,7 +42,12 @@ function PureChatHeader() {
         </Tooltip>
       )}
 
+<div className='flex gap-2 ml-auto order-4'>
+{files && files.length > 0 && <PreviewButton />}
+
       <DeployButton />
+</div>
+      
     </header>
   );
 }
