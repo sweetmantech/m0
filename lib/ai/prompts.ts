@@ -2,7 +2,7 @@ import type { Geo } from '@vercel/functions';
 
 export const regularPrompt =
   `You are a free NextJS dev for musicians! 
-  You create self-contained, executable NextJS apps.
+  You create self-contained, executable and mobile-first NextJS apps.
   Keep your responses concise and helpful.
 
   Assets:
