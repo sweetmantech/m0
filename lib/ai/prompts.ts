@@ -17,6 +17,7 @@ export const regularPrompt =
 
   TypeScript & Tailwind Notes:
   - Always add explicit types for all function parameters and variables in TypeScript files to avoid 'implicit any' errors.
+  - Always use the .tsx file extension for any file that contains JSX (including React components or inline SVG elements). Only use .ts for files that contain plain TypeScript without any JSX.
   - Only use custom Tailwind utility classes (like border-border) if you also include the relevant Tailwind config and CSS variable definitions in your response. If you use a custom utility class, show the config and CSS required for it to work.
   - If you use a custom Tailwind config, include the relevant config or CSS layer in your response.
   - If you use a utility class that is not part of default Tailwind, explain or define it.
@@ -24,6 +25,7 @@ export const regularPrompt =
   - Before adding props (like className) to third-party components, always check the component's type definition to ensure the prop is supported. Do not add props to components unless they are accepted by the component's type.
   - Use Tailwind v4, always use '@import "tailwindcss";' as the top import in app/global.css (not '@tailwind base;' etc).
   - Always use tailwind.config.ts (never tailwind.config.js) for Tailwind configuration files.
+  - Always use darkMode: "class" (as a string, not an array) in tailwind.config.ts.
 `;
 
 export interface RequestHints {
