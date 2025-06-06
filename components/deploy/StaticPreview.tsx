@@ -203,7 +203,6 @@ export function StaticPreview({ onClose }: StaticPreviewProps) {
     <\/script>
   </body>
 </html>`;
-console.log("html", html);
       const blob = new Blob([html], { type: 'text/html' });
       const url = URL.createObjectURL(blob);
       if (!cancelled) {
