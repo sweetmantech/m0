@@ -5,6 +5,7 @@ import { Message } from 'ai';
 import { useState, useEffect } from 'react';
 import { parseFilesFromMessageContent } from '@/lib/vercel/parseFilesFromMessageContent';
 import { useMutation, useQuery } from '@tanstack/react-query';
+import { FileDescriptor } from '../lib/vercel/getAncillaryFeatures';
 
 export interface DeployContextValue {
   deploy: (message: Message) => Promise<any>;
@@ -13,12 +14,14 @@ export interface DeployContextValue {
   isLoading: boolean;
   showOverlay: boolean;
   closeOverlay: () => void;
+  files: FileDescriptor[] | null;
 }
 
 export function useDeploy(accessToken?: string | null): DeployContextValue {
   const [showOverlay, setShowOverlay] = useState(false);
   const [deploymentId, setDeploymentId] = useState<string | null>(null);
   const [projectInfo, setProjectInfo] = useState<any>(null);
+  const [files, setFiles] = useState<FileDescriptor[] | null>(null);
 
   // Mutation to trigger deployment
   const deployMutation = useMutation({
@@ -27,6 +30,7 @@ export function useDeploy(accessToken?: string | null): DeployContextValue {
       const files = parseFilesFromMessageContent(message.content);
       const body: any = { accessToken };
       if (files.length > 0) body.files = files;
+      setFiles(files);
       const res = await fetch('/api/deploy', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
@@ -68,6 +72,7 @@ export function useDeploy(accessToken?: string | null): DeployContextValue {
     setShowOverlay(false);
     setDeploymentId(null);
     setProjectInfo(null);
+    setFiles(null);
     return deployMutation.mutateAsync(message);
   }
 
@@ -90,5 +95,6 @@ export function useDeploy(accessToken?: string | null): DeployContextValue {
     isLoading: deployMutation.isPending || isPolling,
     showOverlay,
     closeOverlay,
+    files,
   };
 } 

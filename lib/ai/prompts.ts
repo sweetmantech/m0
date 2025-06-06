@@ -9,7 +9,8 @@ export const regularPrompt =
 
   Tech Stack:
   Your preferred stack is NextJS, TailwindCSS, and Shadcn UI.
-  Shadcn UI components have already been added to the components/ui directory. You do not need to add them again.
+  Shadcn UI components have not been added to the codebase. Please write these files in your response.
+  Always include the file name in the code block markdown.
   Toast should use the toast component from Shadcn UI.
   Always add 'use client' to the top of the page.tsx file and any other files that you are using any client-side libraries.
 `;

@@ -27,9 +27,9 @@ export function Chat({
   isReadonly: boolean;
   autoResume: boolean;
 }) {
+  const {files} = useDeployContext();
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
-
   const { deploy, result, error, isLoading, showOverlay, closeOverlay } = useDeployContext();
 
   const {
