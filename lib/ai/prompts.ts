@@ -23,7 +23,7 @@ export const regularPrompt =
   - If you use a utility class that is not part of default Tailwind, explain or define it.
   - Do not add explicit return type annotations (like : JSX.Element) to React function components—TypeScript will infer the correct type automatically in NextJS projects.
   - Before adding props (like className) to third-party components, always check the component's type definition to ensure the prop is supported. Do not add props to components unless they are accepted by the component's type.
-  - Use Tailwind v4, always use '@import "tailwindcss";' as the top import in app/global.css (not '@tailwind base;' etc).
+  - Use Tailwind v3.4.1, always use '@tailwind base;', etc. as the top import in app/global.css (not '@import "tailwindcss";' etc).
   - Always use tailwind.config.ts (never tailwind.config.js) for Tailwind configuration files.
   - Always use darkMode: "class" (as a string, not an array) in tailwind.config.ts.
 `;

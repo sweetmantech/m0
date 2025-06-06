@@ -33,9 +33,8 @@ export function getDeploymentFiles(
     next: '15.3.3',
     react: '19.0.0',
     'react-dom': '19.0.0',
-    "@tailwindcss/postcss": "latest",
-    "tailwindcss": "latest",
-    "postcss": "latest",
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8",
   };
 
   // Add importPackages to baseDependencies

@@ -55,7 +55,9 @@ export default function RootLayout({ children }: { children: ReactNode }) {
     },
     {
       file: 'app/globals.css',
-      data: `@import "tailwindcss";
+      data: `@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
   --background: #ffffff;
@@ -102,11 +104,15 @@ export function cn(...inputs: ClassValue[]) {
     },
     {
       file: 'postcss.config.mjs',
-      data: `export default {
+      data: `/** @type {import('postcss-load-config').Config} */
+const config = {
   plugins: {
-    "@tailwindcss/postcss": {},
-  }
-}
+    tailwindcss: {},
+    'tailwindcss/nesting': {},
+  },
+};
+
+export default config;
 `,
       encoding: 'utf-8',
     },
