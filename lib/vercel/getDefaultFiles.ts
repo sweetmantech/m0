@@ -102,11 +102,11 @@ export function cn(...inputs: ClassValue[]) {
     },
     {
       file: 'postcss.config.mjs',
-      data: `const config = {
-  plugins: ["@tailwindcss/postcss"],
-};
-
-export default config;
+      data: `export default {
+  plugins: {
+    "@tailwindcss/postcss": {},
+  }
+}
 `,
       encoding: 'utf-8',
     },
