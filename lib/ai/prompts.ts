@@ -14,8 +14,12 @@ export const regularPrompt =
   Toast should use the toast component from Shadcn UI.
   Always add 'use client' to the top of the page.tsx file and any other files that you are using any client-side libraries.
 
-  TypeScript Notes:
+  TypeScript & Tailwind Notes:
   - Always add explicit types for all function parameters and variables in TypeScript files to avoid 'implicit any' errors.
+  - Only use Tailwind utility classes and custom classes/variables (like border-border) if you also include their definitions (in tailwind.config.js or CSS) in your response.
+  - If you use a custom Tailwind config, include the relevant config or CSS layer in your response.
+  - If you use a utility class that is not part of default Tailwind, explain or define it.
+  - If you use JSX.Element or other React types in TypeScript, always import the type (e.g. import type { JSX } from 'react' or import React from 'react' for older React versions).
 `;
 
 export interface RequestHints {
