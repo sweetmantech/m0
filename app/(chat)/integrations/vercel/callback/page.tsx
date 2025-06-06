@@ -13,23 +13,23 @@ export default async function Page({ searchParams }: { searchParams: Promise<{ [
   let accessToken: string | null = null;
   let error: string | null = null;
 
-    const res = await fetch('https://api.vercel.com/v2/oauth/access_token', {
-      method: 'POST',
-      headers: {
-        'Content-Type': 'application/x-www-form-urlencoded',
-      },
-      body: new URLSearchParams({
-        code,
-        client_id: process.env.VERCEL_CLIENT_ID!,
-        client_secret: process.env.VERCEL_CLIENT_SECRET!,
-        redirect_uri: `${process.env.NEXT_PUBLIC_URL}/integrations/vercel/callback`,
-      }),
-      cache: 'no-store',
-    });
+  const res = await fetch('https://api.vercel.com/v2/oauth/access_token', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/x-www-form-urlencoded',
+    },
+    body: new URLSearchParams({
+      code,
+      client_id: process.env.VERCEL_CLIENT_ID!,
+      client_secret: process.env.VERCEL_CLIENT_SECRET!,
+      redirect_uri: `${process.env.NEXT_PUBLIC_URL}/integrations/vercel/callback`,
+    }),
+    cache: 'no-store',
+  });
 
-    if (!res.ok) {
-      error = `Failed to exchange code: ${res.statusText}`;
-    } else {
+  if (!res.ok) {
+    error = `Failed to exchange code: ${res.statusText}`;
+  } else {
     let data: any = null;
     try {
       data = await res.json();
