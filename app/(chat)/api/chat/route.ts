@@ -69,7 +69,7 @@ export async function POST(request: Request) {
       execute: (dataStream) => {
         const result = streamText({
           model: vercel('v0-1.0-md'),
-          system: systemPrompt({ selectedChatModel, requestHints }),
+          system: systemPrompt({ requestHints }),
           messages,
           maxSteps: 5,
           experimental_transform: smoothStream({ chunking: 'word' }),
