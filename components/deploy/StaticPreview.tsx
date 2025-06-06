@@ -1,6 +1,6 @@
-import React, { useEffect, useRef, useState } from 'react';
+import React from 'react';
 import { useDeployContext } from '@/providers/DeployProvider';
-import { getIframeUrl } from '@/lib/preview/getIframeUrl';
+import useStaticPreview from '@/hooks/use-static-preview';
 
 interface StaticPreviewProps {
   onClose: () => void;
@@ -8,46 +8,9 @@ interface StaticPreviewProps {
 
 export function StaticPreview({ onClose }: StaticPreviewProps) {
   const { files } = useDeployContext();
-  const [blobUrl, setBlobUrl] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  const [loading, setLoading] = useState(false);
-  const prevBlobUrl = useRef<string | null>(null);
-
-  // Find the main file
   const mainFile = files?.find((f) => f.file === 'app/page.tsx');
   const code = mainFile?.data;
-
-  useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    setError(null);
-    if (!code) {
-      setError('No app/page.tsx file found for preview.');
-      setBlobUrl(null);
-      setLoading(false);
-      return;
-    }
-    try {
-      const url = getIframeUrl({
-        code,
-        files,
-      });
-      if (!cancelled) {
-        if (prevBlobUrl.current) URL.revokeObjectURL(prevBlobUrl.current);
-        prevBlobUrl.current = url;
-        setBlobUrl(url);
-      }
-    } catch (e: any) {
-      setError(e.message || 'Failed to generate preview');
-      setBlobUrl(null);
-    } finally {
-      setLoading(false);
-    }
-    return () => {
-      cancelled = true;
-      if (prevBlobUrl.current) URL.revokeObjectURL(prevBlobUrl.current);
-    };
-  }, [code, files]);
+  const { blobUrl, error, loading } = useStaticPreview(code, files);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70">
