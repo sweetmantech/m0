@@ -33,6 +33,8 @@ export function getDeploymentFiles(
     next: '15.3.3',
     react: '19.0.0',
     'react-dom': '19.0.0',
+    "tailwindcss": "^3.4.1",
+    "postcss": "^8",
   };
 
   // Add importPackages to baseDependencies
@@ -69,8 +71,6 @@ export function getDeploymentFiles(
         "@types/node": "^20",
         "@types/react": "^19",
         "@types/react-dom": "^19",
-        "@tailwindcss/postcss": "^4",
-        "tailwindcss": "^4",
         "eslint": "^9",
         "eslint-config-next": "15.3.3",
         "@eslint/eslintrc": "^3"
