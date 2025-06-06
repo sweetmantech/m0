@@ -69,8 +69,9 @@ export function getDeploymentFiles(
         "@types/node": "^20",
         "@types/react": "^19",
         "@types/react-dom": "^19",
-        "@tailwindcss/postcss": "^4",
-        "tailwindcss": "^4",
+        "@tailwindcss/postcss": "latest",
+        "tailwindcss": "latest",
+        "postcss": "latest",
         "eslint": "^9",
         "eslint-config-next": "15.3.3",
         "@eslint/eslintrc": "^3"
