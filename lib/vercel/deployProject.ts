@@ -1,6 +1,7 @@
 import { Vercel } from '@vercel/sdk';
 import { createProject } from '@/lib/vercel/createProject';
 import { getDeploymentFiles } from '@/lib/vercel/getDeploymentFiles';
+import { DEFAULT_PREVIEW_PROJECT_NAME } from '@/lib/constants';
 
 // Utility to extract packages from install commands in LLM message content
 function extractPackagesFromInstallCommands(messages: Array<{ content?: string }>): string[] {
@@ -31,15 +32,16 @@ export async function deployProject(
   files?: Array<{ file: string; data: string; encoding: string }>,
   messages?: Array<{ content?: string }>
 ) {
-  // Create a new project using the utility
-  const projectInfo = await createProject(vercel, uniqueName);
+  // Only create a new project if not using the default preview project name
+  const isDefaultProject = uniqueName === DEFAULT_PREVIEW_PROJECT_NAME;
+  const projectInfo = isDefaultProject ? { id: null, name: uniqueName } : await createProject(vercel, uniqueName);
 
   // Parse install commands from messages (if provided)
   const requiredPackages = messages ? extractPackagesFromInstallCommands(messages) : [];
 
   // Always use getDeploymentFiles to backfill required files
   const deploymentFiles = getDeploymentFiles(uniqueName, files, requiredPackages);
-  
+
   // Deploy the new project
   const deployResponse = await vercel.deployments.createDeployment({
     requestBody: {
@@ -50,6 +52,6 @@ export async function deployProject(
     },
   });
   const deploymentInfo = { id: deployResponse.id, status: deployResponse.status };
-
+  
   return { projectInfo, deploymentInfo };
 } 
