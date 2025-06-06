@@ -30,7 +30,6 @@ export function Chat({
   const {files} = useDeployContext();
   const searchParams = useSearchParams();
   const query = searchParams.get('query');
-  console.log("Files", files);
   const { deploy, result, error, isLoading, showOverlay, closeOverlay } = useDeployContext();
 
   const {
@@ -68,7 +67,6 @@ export function Chat({
     },
     onFinish: deploy,
   });
-  console.log("Messages", messages);
 
   const [hasAppendedQuery, setHasAppendedQuery] = useState(false);
 
