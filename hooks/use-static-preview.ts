@@ -1,6 +1,6 @@
 import { useEffect, useRef, useState } from 'react';
 import { getIframeUrl } from '@/lib/preview/getIframeUrl';
-import { FileDescriptor } from '@/lib/vercel/getAncillaryFeatures';
+import { FileDescriptor } from '@/lib/types';
 
 export default function useStaticPreview(code: string | undefined, files: FileDescriptor[] | null) {
   const [blobUrl, setBlobUrl] = useState<string | null>(null);

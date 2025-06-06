@@ -5,7 +5,7 @@ import { Message } from 'ai';
 import { useState, useEffect } from 'react';
 import { parseFilesFromMessageContent } from '@/lib/vercel/parseFilesFromMessageContent';
 import { useMutation, useQuery } from '@tanstack/react-query';
-import { FileDescriptor } from '../lib/vercel/getAncillaryFeatures';
+import { FileDescriptor } from '@/lib/types';
 
 export interface DeployContextValue {
   deploy: (message: Message) => Promise<any>;

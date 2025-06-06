@@ -1,7 +1,7 @@
 import { buildImportMapFromAllFiles } from "./buildImportMapFromAllFiles";
 import { filenameToVar } from "./filenameToVar";
 import { stripNonNpmImports } from "./stripNonNpmImports";
-import { FileDescriptor } from '../vercel/getAncillaryFeatures';
+import { FileDescriptor } from '@/lib/types';
 
 /**
  * Generates a blob URL for the preview iframe, given the code, files, import map, local code blocks, main code, and error handler script.
