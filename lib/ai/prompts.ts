@@ -17,10 +17,11 @@ export const regularPrompt =
 
   TypeScript & Tailwind Notes:
   - Always add explicit types for all function parameters and variables in TypeScript files to avoid 'implicit any' errors.
-  - Only use Tailwind utility classes and custom classes/variables (like border-border) if you also include their definitions (in tailwind.config.ts or CSS) in your response.
+  - Only use custom Tailwind utility classes (like border-border) if you also include the relevant Tailwind config and CSS variable definitions in your response. If you use a custom utility class, show the config and CSS required for it to work.
   - If you use a custom Tailwind config, include the relevant config or CSS layer in your response.
   - If you use a utility class that is not part of default Tailwind, explain or define it.
-  - Do not add explicit return type annotations (like : JSX.Element) to React function components—TypeScript will infer the correct type automatically in NextJS projects.`;
+  - Do not add explicit return type annotations (like : JSX.Element) to React function components—TypeScript will infer the correct type automatically in NextJS projects.
+  - Before adding props (like className) to third-party components, always check the component's type definition to ensure the prop is supported. Do not add props to components unless they are accepted by the component's type.`;
 
 export interface RequestHints {
   latitude: Geo['latitude'];
