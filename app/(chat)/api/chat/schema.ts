@@ -23,6 +23,7 @@ export const postRequestBodySchema = z.object({
       )
       .optional(),
   }),
+  messages: z.array(z.any()).optional(),
   selectedChatModel: z.enum(['chat-model', 'chat-model-reasoning']),
 });
 
