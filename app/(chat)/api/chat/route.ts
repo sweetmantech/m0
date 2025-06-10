@@ -3,6 +3,7 @@ import {
   createDataStream,
   smoothStream,
   streamText,
+  type Message,
 } from 'ai';
 import { type RequestHints, systemPrompt } from '@/lib/ai/prompts';
 import { generateUUID } from '@/lib/utils';
@@ -45,11 +46,11 @@ export async function POST(request: Request) {
   }
 
   try {
-    const {  message, selectedChatModel } =
+    const {  message, messages: prevMessages, selectedChatModel } =
       requestBody;
 
     const messages = appendClientMessage({
-      messages: [],
+      messages: (prevMessages || []) as Message[],
       message,
     });
 
