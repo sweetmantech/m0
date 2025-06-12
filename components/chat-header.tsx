@@ -9,7 +9,6 @@ import { useSidebar } from './ui/sidebar';
 import { memo } from 'react';
 import { Tooltip, TooltipContent, TooltipTrigger } from './ui/tooltip';
 import DeployButton from './deploy';
-import PreviewButton from './deploy/PreviewButton';
 import { useDeployContext } from '@/providers/DeployProvider';
 
 function PureChatHeader() {
@@ -42,7 +41,6 @@ function PureChatHeader() {
       )}
 
       <div className='flex gap-2 md:ml-auto order-4'>
-        {files && files.length > 0 && <PreviewButton />}
         <DeployButton />
       </div>
     </header>
